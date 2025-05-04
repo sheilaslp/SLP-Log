@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLP Communication Language Data Logger</title>
+    <style>
+        :root {
+            --navy-blue: #1e3464;
+            --light-green: #a6c63b;
+            --medium-green: #8cb332;
+            --cream-bg: #f7f5e1;
+            --light-gray: #f8f9fa;
+            --border-gray: #ddd;
+            --text-dark: #333;
+        }
+        
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            padding: 16px;
+            background-color: var(--cream-bg);
+            color: var(--text-dark);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--navy-blue);
+        }
+        
+        .settings-button {
+            background-color: var(--navy-blue);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: block;
+            margin: -0.5rem auto 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--navy-blue);
+        }
+        
+        select, input, button {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            height: 48px;
+        }
+        
+        button {
+            background-color: var(--medium-green);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button:hover {
+            background-color: var(--light-green);
+        }
+        
+        .copy-btn {
+            background-color: var(--navy-blue);
+            margin-top: 1.5rem;
+        }
+        
+        .copy-btn:hover {
+            background-color: #2a4580;
+        }
+        
+        .clear-btn {
+            background-color: #dc3545;
+            margin-top: 0.5rem;
+        }
+        
+        .clear-btn:hover {
+            background-color: #c82333;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: var(--light-gray);
+            font-weight: 600;
+            color: var(--navy-blue);
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .entry-count {
+            font-weight: bold;
+            width: 40px;
+        }
+        
+        .entry-actions {
+            width: 100px;
+            text-align: right;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            margin: 0 2px;
+            width: auto;
+            font-size: 0.9rem;
+            height: auto;
+        }
+        
+        .edit-entry-btn {
+            color: var(--medium-green);
+        }
+        
+        .delete-entry-btn {
+            color: #dc3545;
+        }
+        
+        .no-entries {
+            text-align: center;
+            padding: 1.5rem;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .success-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--medium-green);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .phrase-input-container {
+            position: relative;
+        }
+        
+        .mic-button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            width: auto;
+            height: auto;
+            font-size: 1.2rem;
+            color: var(--navy-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .mic-button.active {
+            color: white;
+            background-color: #dc3545;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .mic-button.visible {
+            display: flex;
+        }
+        
+        .mic-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        /* Logo styling */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        
+        .app-logo {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--navy-blue);
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+            width: auto;
+            height: auto;
+            color: #6c757d;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .tab-button {
+            background: none;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #6c757d;
+            margin: 0;
+            width: auto;
+            height: auto;
+        }
+        
+        .tab-button.active {
+            color: var(--medium-green);
+            border-bottom: 2px solid var(--medium-green);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .option-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        
+        .option-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .option-item:last-child {
+            border-bottom: none;
+        }
+        
+        .option-text {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        
+        .option-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .edit-btn, .delete-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            margin: 0;
+            width: auto;
+            height: auto;
+            font-size: 0.9rem;
+        }
+        
+        .edit-btn {
+            color: var(--medium-green);
+        }
+        
+        .delete-btn {
+            color: #dc3545;
+        }
+        
+        .add-option-form {
+            display: flex;
+            margin-top: 15px;
+        }
+        
+        .add-option-input {
+            flex-grow: 1;
+            margin-right: 10px;
+            padding: 8px 12px;
+            height: 40px;
+        }
+        
+        .add-option-btn {
+            width: auto;
+            padding: 8px 15px;
+            margin: 0;
+            height: 40px;
+            background-color: var(--medium-green);
+        }
+        
+        .edit-form {
+            display: flex;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .edit-input {
+            flex-grow: 1;
+            margin-right: 5px;
+            padding: 8px;
+            height: 40px;
+        }
+        
+        .save-edit-btn, .cancel-edit-btn {
+            width: auto;
+            padding: 8px;
+            margin: 0;
+            font-size: 0.8rem;
+            height: 40px;
+        }
+        
+        .save-edit-btn {
+            background-color: var(--medium-green);
+            margin-right: 5px;
+        }
+        
+        .cancel-edit-btn {
+            background-color: #6c757d;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .save-settings-btn {
+            background-color: var(--medium-green);
+            width: auto;
+            padding: 8px 20px;
+            height: 40px;
+        }
+        
+        .reset-defaults-btn {
+            background-color: #6c757d;
+            width: auto;
+            padding: 8px 20px;
+            margin-right: 10px;
+            height: 40px;
+        }
+        
+        /* Edit entry modal */
+        .edit-entry-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        
+        .edit-entry-content {
+            background-color: white;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .edit-entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .edit-entry-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--navy-blue);
+        }
+        
+        .edit-entry-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 15px;
+            gap: 10px;
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+            }
+            
+            th, td {
+                padding: 8px;
+                font-size: 0.9rem;
+            }
+            
+            .modal-content, .edit-entry-content {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .entry-actions {
+                width: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <svg class="app-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50,10 C30,10 15,30 20,50 C25,70 35,85 50,90 C65,85 75,70 80,50 C85,30 70,10 50,10 Z" fill="#a6c63b" />
+            <path d="M30,30 C20,40 20,60 30,70 C40,60 40,40 30,30 Z" fill="#1e3464" />
+        </svg>
+        <h1>SLP Communication Language Data Logger</h1>
+    </div>
+    <button id="settingsButton" class="settings-button">⚙️ Customize Options</button>
+    
+    <div class="form-group">
+        <label for="communicationType">Language Content/Function:</label>
+        <select id="communicationType">
+            <option value="">Select Type</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label for="supportLevel">Support Level:</label>
+        <select id="supportLevel">
+            <option value="">Select Support</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label for="phrase">Phrase:</label>
+        <div class="phrase-input-container">
+            <input type="text" id="phrase" placeholder="Enter or dictate phrase">
+            <button id="micButton" class="mic-button visible">
+                <div class="mic-icon">🎤</div>
+            </button>
+        </div>
+    </div>
+    
+    <button id="logButton">Log Entry</button>
+    
+    <div id="entriesContainer">
+        <table id="entriesTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Type</th>
+                    <th>Support</th>
+                    <th>Phrase</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="entriesBody">
+                <tr>
+                    <td colspan="5" class="no-entries">No entries yet</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="button-group">
+        <button id="copyButton" class="copy-btn">Copy Log to Clipboard</button>
+        <button id="clearButton" class="clear-btn">Clear All Entries</button>
+    </div>
+    
+    <div id="successMessage" class="success-message">Copied to clipboard!</div>
+    
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Customize Options</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            
+            <div class="tab-buttons">
+                <button class="tab-button active" data-tab="communicationTab">Language Content/Function</button>
+                <button class="tab-button" data-tab="supportTab">Support Levels</button>
+            </div>
+            
+            <div id="communicationTab" class="tab-content active">
+                <div class="option-list" id="communicationOptionsList"></div>
+                <div class="add-option-form">
+                    <input type="text" class="add-option-input" id="newCommunicationType" placeholder="Add new language content/function">
+                    <button class="add-option-btn" id="addCommunicationTypeBtn">Add</button>
+                </div>
+            </div>
+            
+            <div id="supportTab" class="tab-content">
+                <div class="option-list" id="supportOptionsList"></div>
+                <div class="add-option-form">
+                    <input type="text" class="add-option-input" id="newSupportLevel" placeholder="Add new support level">
+                    <button class="add-option-btn" id="addSupportLevelBtn">Add</button>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="reset-defaults-btn" id="resetDefaultsBtn">Reset to Defaults</button>
+                <button class="save-settings-btn" id="saveSettingsBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Entry Modal -->
+    <div id="editEntryModal" class="edit-entry-modal">
+        <div class="edit-entry-content">
+            <div class="edit-entry-header">
+                <h2 class="edit-entry-title">Edit Entry</h2>
+                <button class="close-modal" id="closeEditModal">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label for="editCommunicationType">Language Content/Function:</label>
+                <select id="editCommunicationType"></select>
+            </div>
+            
+            <div class="form-group">
+                <label for="editSupportLevel">Support Level:</label>
+                <select id="editSupportLevel"></select>
+            </div>
+            
+            <div class="form-group">
+                <label for="editPhrase">Phrase:</label>
+                <input type="text" id="editPhrase">
+            </div>
+            
+            <div class="edit-entry-footer">
+                <button id="cancelEditBtn" class="cancel-edit-btn">Cancel</button>
+                <button id="saveEditBtn" class="save-edit-btn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Default options
+        const defaultCommunicationTypes = [
+            "Direct Actions",
+            "Protest/Rejecting",
+            "Comment Attributes",
+            "Comment Locative",
+            "Responding, Joining",
+            "Obtaining Attention/Info",
+            "Greeting",
+            "Expressing feelings",
+            "Self-advocating",
+            "Regulating",
+            "Other"
+        ];
+        
+        const defaultSupportLevels = [
+            "1a. Independent as motivated",
+            "1b. Independent on external demand",
+            "1c. Achieved with consistent, appropriate accommodation",
+            "2. Inviting or distracted pausing",
+            "3. Indirect visual cues",
+            "4. Direct visual cues with option prompts as needed",
+            "5. Indirect verbal cues/Invitation to discuss",
+            "6. Direct verbal cues (options or first words/sounds)",
+            "7. Specific non-directive models",
+            "8. Re-exposure to target and increase motivation"
+        ];
+        
+        // Current options (will be loaded from localStorage if available)
+        let communicationTypes = [...defaultCommunicationTypes];
+        let supportLevels = [...defaultSupportLevels];
+        
+        // Initialize entries array
+        let entries = [];
+        
+        // DOM elements
+        const communicationTypeSelect = document.getElementById('communicationType');
+        const supportLevelSelect = document.getElementById('supportLevel');
+        const phraseInput = document.getElementById('phrase');
+        const micButton = document.getElementById('micButton');
+        const logButton = document.getElementById('logButton');
+        const entriesBody = document.getElementById('entriesBody');
+        const copyButton = document.getElementById('copyButton');
+        const clearButton = document.getElementById('clearButton');
+        const successMessage = document.getElementById('successMessage');
+        
+        // Settings modal elements
+        const settingsButton = document.getElementById('settingsButton');
+        const settingsModal = document.getElementById('settingsModal');
+        const closeModalBtn = document.querySelector('.close-modal');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const communicationOptionsList = document.getElementById('communicationOptionsList');
+        const supportOptionsList = document.getElementById('supportOptionsList');
+        const newCommunicationTypeInput = document.getElementById('newCommunicationType');
+        const addCommunicationTypeBtn = document.getElementById('addCommunicationTypeBtn');
+        const newSupportLevelInput = document.getElementById('newSupportLevel');
+        const addSupportLevelBtn = document.getElementById('addSupportLevelBtn');
+        const resetDefaultsBtn = document.getElementById('resetDefaultsBtn');
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        
+        // Edit entry modal elements
+        const editEntryModal = document.getElementById('editEntryModal');
+        const closeEditModalBtn = document.getElementById('closeEditModal');
+        const editCommunicationTypeSelect = document.getElementById('editCommunicationType');
+        const editSupportLevelSelect = document.getElementById('editSupportLevel');
+        const editPhraseInput = document.getElementById('editPhrase');
+        const saveEditBtn = document.getElementById('saveEditBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        let currentEditingIndex = -1;
+        
+        // Speech recognition variables
+        let recognition = null;
+        let isRecording = false;
+        
+        // Load options from localStorage if available
+        function loadOptions() {
+            const savedCommunicationTypes = localStorage.getItem('communicationTypes');
+            const savedSupportLevels = localStorage.getItem('supportLevels');
+            const savedEntries = localStorage.getItem('entries');
+            
+            if (savedCommunicationTypes) {
+                communicationTypes = JSON.parse(savedCommunicationTypes);
+            }
+            
+            if (savedSupportLevels) {
+                supportLevels = JSON.parse(savedSupportLevels);
+            }
+            
+            if (savedEntries) {
+                entries = JSON.parse(savedEntries);
+            }
+            
+            populateDropdowns();
+        }
+        
+        // Save entries to localStorage
+        function saveEntries() {
+            localStorage.setItem('entries', JSON.stringify(entries));
+        }
+        
+        // Populate dropdowns with current options
+        function populateDropdowns() {
+            // Clear existing options except the first one
+            while (communicationTypeSelect.options.length > 1) {
+                communicationTypeSelect.remove(1);
+            }
+            
+            while (supportLevelSelect.options.length > 1) {
+                supportLevelSelect.remove(1);
+            }
+            
+            // Add communication types
+            communicationTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                communicationTypeSelect.appendChild(option);
+            });
+            
+            // Add support levels
+            supportLevels.forEach(level => {
+                const option = document.createElement('option');
+                option.value = level;
+                option.textContent = level;
+                supportLevelSelect.appendChild(option);
+            });
+        }
+        
+        // Populate edit modal dropdowns
+        function populateEditDropdowns() {
+            // Clear existing options
+            editCommunicationTypeSelect.innerHTML = '';
+            editSupportLevelSelect.innerHTML = '';
+            
+            // Add communication types
+            communicationTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                editCommunicationTypeSelect.appendChild(option);
+            });
+            
+            // Add support levels
+            supportLevels.forEach(level => {
+                const option = document.createElement('option');
+                option.value = level;
+                option.textContent = level;
+                editSupportLevelSelect.appendChild(option);
+            });
+        }
+        
+        // Populate option lists in the settings modal
+        function populateOptionLists() {
+            // Clear existing lists
+            communicationOptionsList.innerHTML = '';
+            supportOptionsList.innerHTML = '';
+            
+            // Populate communication types
+            communicationTypes.forEach((type, index) => {
+                const optionItem = document.createElement('div');
+                optionItem.className = 'option-item';
+                optionItem.dataset.index = index;
+                
+                const optionText = document.createElement('div');
+                optionText.className = 'option-text';
+                optionText.textContent = type;
+                
+                const optionActions = document.createElement('div');
+                optionActions.className = 'option-actions';
+                
+                const editBtn = document.createElement('button');
+                editBtn.className = 'edit-btn';
+                editBtn.textContent = 'Edit';
+                editBtn.onclick = () => startEditing(optionItem, type, 'communication');
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.onclick = () => deleteOption(index, 'communication');
+                
+                optionActions.appendChild(editBtn);
+                optionActions.appendChild(deleteBtn);
+                
+                optionItem.appendChild(optionText);
+                optionItem.appendChild(optionActions);
+                
+                communicationOptionsList.appendChild(optionItem);
+            });
+            
+            // Populate support levels
+            supportLevels.forEach((level, index) => {
+                const optionItem = document.createElement('div');
+                optionItem.className = 'option-item';
+                optionItem.dataset.index = index;
+                
+                const optionText = document.createElement('div');
+                optionText.className = 'option-text';
+                optionText.textContent = level;
+                
+                const optionActions = document.createElement('div');
+                optionActions.className = 'option-actions';
+                
+                const editBtn = document.createElement('button');
+                editBtn.className = 'edit-btn';
+                editBtn.textContent = 'Edit';
+                editBtn.onclick = () => startEditing(optionItem, level, 'support');
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.onclick = () => deleteOption(index, 'support');
+                
+                optionActions.appendChild(editBtn);
+                optionActions.appendChild(deleteBtn);
+                
+                optionItem.appendChild(optionText);
+                optionItem.appendChild(optionActions);
+                
+                supportOptionsList.appendChild(optionItem);
+            });
+        }
+        
+        // Start editing an option
+        function startEditing(optionItem, currentValue, type) {
+            const index = parseInt(optionItem.dataset.index);
+            const optionText = optionItem.querySelector('.option-text');
+            const optionActions = optionItem.querySelector('.option-actions');
+            
+            // Hide the text and actions
+            optionText.style.display = 'none';
+            optionActions.style.display = 'none';
+            
+            // Create edit form
+            const editForm = document.createElement('div');
+            editForm.className = 'edit-form';
+            
+            const editInput = document.createElement('input');
+            editInput.type = 'text';
+            editInput.className = 'edit-input';
+            editInput.value = currentValue;
+            
+            const saveBtn = document.createElement('button');
+            saveBtn.className = 'save-edit-btn';
+            saveBtn.textContent = 'Save';
+            saveBtn.onclick = () => saveEdit(index, editInput.value, type, optionItem);
+            
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'cancel-edit-btn';
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.onclick = () => cancelEdit(optionItem);
+            
+            editForm.appendChild(editInput);
+            editForm.appendChild(saveBtn);
+            editForm.appendChild(cancelBtn);
+            
+            optionItem.appendChild(editForm);
+        }
+        
+        // Save edited option
+        function saveEdit(index, newValue, type, optionItem) {
+            if (newValue.trim() === '') {
+                alert('Option cannot be empty');
+                return;
+            }
+            
+            if (type === 'communication') {
+                communicationTypes[index] = newValue;
+            } else {
+                supportLevels[index] = newValue;
+            }
+            
+            // Refresh the option lists
+            populateOptionLists();
+        }
+        
+        // Cancel editing
+        function cancelEdit(optionItem) {
+            const optionText = optionItem.querySelector('.option-text');
+            const optionActions = optionItem.querySelector('.option-actions');
+            const editForm = optionItem.querySelector('.edit-form');
+            
+            // Show the text and actions
+            optionText.style.display = 'block';
+            optionActions.style.display = 'flex';
+            
+            // Remove the edit form
+            editForm.remove();
+        }
+        
+        // Delete an option
+        function deleteOption(index, type) {
+            if (type === 'communication') {
+                if (communicationTypes.length <= 1) {
+                    alert('You must have at least one language content/function type');
+                    return;
+                }
+                communicationTypes.splice(index, 1);
+            } else {
+                if (supportLevels.length <= 1) {
+                    alert('You must have at least one support level');
+                    return;
+                }
+                supportLevels.splice(index, 1);
+            }
+            
+            // Refresh the option lists
+            populateOptionLists();
+        }
+        
+        // Add a new option
+        function addOption(type) {
+            const input = type === 'communication' ? newCommunicationTypeInput : newSupportLevelInput;
+            const value = input.value.trim();
+            
+            if (value === '') {
+                alert('Option cannot be empty');
+                return;
+            }
+            
+            if (type === 'communication') {
+                if (communicationTypes.includes(value)) {
+                    alert('This language content/function type already exists');
+                    return;
+                }
+                communicationTypes.push(value);
+            } else {
+                if (supportLevels.includes(value)) {
+                    alert('This support level already exists');
+                    return;
+                }
+                supportLevels.push(value);
+            }
+            
+            // Clear the input
+            input.value = '';
+            
+            // Refresh the option lists
+            populateOptionLists();
+        }
+        
+        // Save options to localStorage
+        function saveOptions() {
+            localStorage.setItem('communicationTypes', JSON.stringify(communicationTypes));
+            localStorage.setItem('supportLevels', JSON.stringify(supportLevels));
+            
+            // Update dropdowns
+            populateDropdowns();
+            
+            // Close the modal
+            settingsModal.style.display = 'none';
+        }
+        
+        // Reset options to defaults
+        function resetOptions() {
+            if (confirm('Are you sure you want to reset all options to defaults?')) {
+                communicationTypes = [...defaultCommunicationTypes];
+                supportLevels = [...defaultSupportLevels];
+                
+                // Refresh the option lists
+                populateOptionLists();
+            }
+        }
+        
+        // Initialize speech recognition
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                
+                // Make mic button visible
+                micButton.classList.add('visible');
+                
+                // Set up event handlers for speech recognition
+                recognition.onstart = () => {
+                    isRecording = true;
+                    micButton.classList.add('active');
+                    phraseInput.placeholder = "Listening...";
+                };
+                
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    phraseInput.value = transcript;
+                };
+                
+                recognition.onend = () => {
+                    isRecording = false;
+                    micButton.classList.remove('active');
+                    phraseInput.placeholder = "Enter or dictate phrase";
+                };
+                
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error', event.error);
+                    isRecording = false;
+                    micButton.classList.remove('active');
+                    phraseInput.placeholder = "Enter or dictate phrase";
+                };
+                
+                // Set up click handlers for speech input
+                phraseInput.addEventListener('click', () => {
+                    if (!isRecording && phraseInput.value === '') {
+                        startRecording();
+                    }
+                });
+                
+                micButton.addEventListener('click', () => {
+                    if (isRecording) {
+                        stopRecording();
+                    } else {
+                        startRecording();
+                    }
+                });
+            }
+        }
+        
+        // Start recording
+        function startRecording() {
+            if (recognition) {
+                recognition.start();
+            }
+        }
+        
+        // Stop recording
+        function stopRecording() {
+            if (recognition && isRecording) {
+                recognition.stop();
+            }
+        }
+        
+        // Log entry function
+        logButton.addEventListener('click', () => {
+            const communicationType = communicationTypeSelect.value;
+            const supportLevel = supportLevelSelect.value;
+            const phrase = phraseInput.value.trim();
+            
+            // Validate inputs
+            if (!communicationType || !supportLevel || !phrase) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            // Add entry to array
+            const entry = {
+                id: entries.length + 1,
+                type: communicationType,
+                support: supportLevel,
+                phrase: phrase
+            };
+            
+            entries.push(entry);
+            
+            // Save entries to localStorage
+            saveEntries();
+            
+            // Update table
+            updateTable();
+            
+            // Clear form
+            communicationTypeSelect.value = '';
+            supportLevelSelect.value = '';
+            phraseInput.value = '';
+        });
+        
+        // Update table function
+        function updateTable() {
+            if (entries.length === 0) {
+                entriesBody.innerHTML = '<tr><td colspan="5" class="no-entries">No entries yet</td></tr>';
+                return;
+            }
+            
+            entriesBody.innerHTML = '';
+            
+            entries.forEach((entry, index) => {
+                const row = document.createElement('tr');
+                
+                const idCell = document.createElement('td');
+                idCell.textContent = entry.id;
+                idCell.className = 'entry-count';
+                
+                const typeCell = document.createElement('td');
+                typeCell.textContent = entry.type;
+                
+                const supportCell = document.createElement('td');
+                supportCell.textContent = entry.support;
+                
+                const phraseCell = document.createElement('td');
+                phraseCell.textContent = entry.phrase;
+                
+                const actionsCell = document.createElement('td');
+                actionsCell.className = 'entry-actions';
+                
+                const editBtn = document.createElement('button');
+                editBtn.className = 'action-btn edit-entry-btn';
+                editBtn.textContent = '✏️';
+                editBtn.title = 'Edit entry';
+                editBtn.onclick = () => openEditModal(index);
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'action-btn delete-entry-btn';
+                deleteBtn.textContent = '🗑️';
+                deleteBtn.title = 'Delete entry';
+                deleteBtn.onclick = () => deleteEntry(index);
+                
+                actionsCell.appendChild(editBtn);
+                actionsCell.appendChild(deleteBtn);
+                
+                row.appendChild(idCell);
+                row.appendChild(typeCell);
+                row.appendChild(supportCell);
+                row.appendChild(phraseCell);
+                row.appendChild(actionsCell);
+                
+                entriesBody.appendChild(row);
+            });
+        }
+        
+        // Open edit modal
+        function openEditModal(index) {
+            currentEditingIndex = index;
+            const entry = entries[index];
+            
+            // Populate edit dropdowns
+            populateEditDropdowns();
+            
+            // Set current values
+            editCommunicationTypeSelect.value = entry.type;
+            editSupportLevelSelect.value = entry.support;
+            editPhraseInput.value = entry.phrase;
+            
+            // Show modal
+            editEntryModal.style.display = 'block';
+        }
+        
+        // Save edited entry
+        function saveEditedEntry() {
+            if (currentEditingIndex === -1) return;
+            
+            const communicationType = editCommunicationTypeSelect.value;
+            const supportLevel = editSupportLevelSelect.value;
+            const phrase = editPhraseInput.value.trim();
+            
+            // Validate inputs
+            if (!communicationType || !supportLevel || !phrase) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            // Update entry
+            entries[currentEditingIndex].type = communicationType;
+            entries[currentEditingIndex].support = supportLevel;
+            entries[currentEditingIndex].phrase = phrase;
+            
+            // Save entries to localStorage
+            saveEntries();
+            
+            // Update table
+            updateTable();
+            
+            // Close modal
+            editEntryModal.style.display = 'none';
+            currentEditingIndex = -1;
+        }
+        
+        // Delete entry
+        function deleteEntry(index) {
+            if (confirm('Are you sure you want to delete this entry?')) {
+                // Remove entry
+                entries.splice(index, 1);
+                
+                // Renumber remaining entries
+                entries.forEach((entry, i) => {
+                    entry.id = i + 1;
+                });
+                
+                // Save entries to localStorage
+                saveEntries();
+                
+                // Update table
+                updateTable();
+            }
+        }
+        
+        // Clear all entries
+        function clearAllEntries() {
+            if (entries.length === 0) {
+                alert('No entries to clear');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to clear all entries? This cannot be undone.')) {
+                entries = [];
+                saveEntries();
+                updateTable();
+            }
+        }
+        
+        // Copy to clipboard function
+        copyButton.addEventListener('click', () => {
+            if (entries.length === 0) {
+                alert('No entries to copy');
+                return;
+            }
+            
+            let copyText = '';
+            
+            entries.forEach(entry => {
+                copyText += `Entry #${entry.id}: ${entry.type} – ${entry.support} – "${entry.phrase}"\n`;
+            });
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(copyText)
+                .then(() => {
+                    // Show success message
+                    successMessage.style.opacity = '1';
+                    setTimeout(() => {
+                        successMessage.style.opacity = '0';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy: ', err);
+                    alert('Failed to copy to clipboard');
+                });
+        });
+        
+        // Settings modal functions
+        settingsButton.addEventListener('click', () => {
+            populateOptionLists();
+            settingsModal.style.display = 'block';
+        });
+        
+        closeModalBtn.addEventListener('click', () => {
+            settingsModal.style.display = 'none';
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', (event) => {
+            if (event.target === settingsModal) {
+                settingsModal.style.display = 'none';
+            }
+            if (event.target === editEntryModal) {
+                editEntryModal.style.display = 'none';
+                currentEditingIndex = -1;
+            }
+        });
+        
+        // Tab switching
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons and contents
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked button and corresponding content
+                button.classList.add('active');
+                document.getElementById(button.dataset.tab).classList.add('active');
+            });
+        });
+        
+        // Add new options
+        addCommunicationTypeBtn.addEventListener('click', () => addOption('communication'));
+        addSupportLevelBtn.addEventListener('click', () => addOption('support'));
+        
+        // Handle enter key in input fields
+        newCommunicationTypeInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                addOption('communication');
+            }
+        });
+        
+        newSupportLevelInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                addOption('support');
+            }
+        });
+        
+        // Save and reset buttons
+        saveSettingsBtn.addEventListener('click', saveOptions);
+        resetDefaultsBtn.addEventListener('click', resetOptions);
+        
+        // Edit entry modal buttons
+        saveEditBtn.addEventListener('click', saveEditedEntry);
+        cancelEditBtn.addEventListener('click', () => {
+            editEntryModal.style.display = 'none';
+            currentEditingIndex = -1;
+        });
+        closeEditModalBtn.addEventListener('click', () => {
+            editEntryModal.style.display = 'none';
+            currentEditingIndex = -1;
+        });
+        
+        // Clear all entries button
+        clearButton.addEventListener('click', clearAllEntries);
+        
+        // Initialize the app
+        loadOptions();
+        initSpeechRecognition();
+        updateTable();
+    </script>
+</body>
+</html>
