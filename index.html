@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLP Communication Language Data Logger</title>
+    <title>SLP Language & Functional Communication Data Logger</title>
     <style>
         :root {
             --navy-blue: #1e3464;
@@ -27,6 +27,9 @@
             color: var(--text-dark);
             max-width: 600px;
             margin: 0 auto;
+            padding-bottom: 80px; /* Add space for footer */
+            position: relative;
+            min-height: 100vh;
         }
         
         h1 {
@@ -34,6 +37,7 @@
             text-align: center;
             margin-bottom: 1rem;
             color: var(--navy-blue);
+            line-height: 1.3;
         }
         
         .settings-button {
@@ -45,7 +49,20 @@
             font-size: 0.9rem;
             cursor: pointer;
             display: block;
-            margin: -0.5rem auto 1.5rem;
+            margin: 0.5rem auto 1.5rem;
+        }
+        
+        .language-toggle {
+            background-color: var(--navy-blue);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto 1rem;
+            font-weight: 500;
         }
         
         .form-group {
@@ -237,13 +254,16 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            flex-direction: column;
+            padding-top: 1rem;
         }
         
         .app-logo {
             width: 40px;
             height: 40px;
-            margin-right: 10px;
+            margin-bottom: 0.5rem;
         }
         
         /* Modal styles */
@@ -490,9 +510,123 @@
             gap: 10px;
         }
         
+        /* Info button and panel styles */
+        .info-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--navy-blue);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        .info-panel {
+            display: none;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .info-panel.active {
+            display: block;
+        }
+        
+        .info-panel h3 {
+            color: var(--navy-blue);
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .info-panel p {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .info-panel ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .info-panel li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .info-panel .divider {
+            border-top: 1px solid #eee;
+            margin: 20px 0;
+        }
+        
+        .info-panel .quote {
+            font-style: italic;
+            padding-left: 15px;
+            border-left: 3px solid var(--light-green);
+            margin-bottom: 10px;
+        }
+        
+        .info-panel .attribution {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .close-info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #6c757d;
+            width: auto;
+            height: auto;
+            padding: 0;
+        }
+        
+        /* Footer styles */
+        .footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--light-gray);
+            padding: 15px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+            border-top: 1px solid var(--border-gray);
+        }
+        
+        .footer p {
+            margin: 5px 0;
+        }
+        
+        .footer .disclaimer {
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+        
+        .footer .credit {
+            font-weight: 500;
+        }
+        
         @media (max-width: 480px) {
             body {
                 padding: 12px;
+                padding-bottom: 100px;
             }
             
             th, td {
@@ -508,6 +642,24 @@
             .entry-actions {
                 width: 80px;
             }
+            
+            .info-button {
+                top: 5px;
+                right: 5px;
+                width: 25px;
+                height: 25px;
+                font-size: 1rem;
+            }
+            
+            .info-panel {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            .footer {
+                padding: 10px;
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
@@ -517,26 +669,66 @@
             <path d="M50,10 C30,10 15,30 20,50 C25,70 35,85 50,90 C65,85 75,70 80,50 C85,30 70,10 50,10 Z" fill="#a6c63b" />
             <path d="M30,30 C20,40 20,60 30,70 C40,60 40,40 30,30 Z" fill="#1e3464" />
         </svg>
-        <h1>SLP Communication Language Data Logger</h1>
+        <h1 id="appTitle">SLP Language & Functional Communication Data Logger</h1>
     </div>
-    <button id="settingsButton" class="settings-button">⚙️ Customize Options</button>
+    
+    <button id="infoButton" class="info-button">i</button>
+    
+    <div id="infoPanel" class="info-panel">
+        <button id="closeInfo" class="close-info">&times;</button>
+        <div id="infoPanelContent">
+            <p id="infoIntro">This tool is designed to help log high-quality communication opportunities during responsive, child-led sessions. There is no strict quota—aim instead to offer multiple, well-timed chances for the child to initiate or respond, based on their regulation, sensory needs, and engagement.</p>
+            
+            <p id="infoIntroChinese">本工具是用於紀錄在以孩子主導並得到適當回應的互動中，所出現的高品質溝通機會。機會數量不設上限或硬性標準，請根據孩子當下的情緒調節、感官狀態與參與度，適時創造並回應自然產生的溝通時機。</p>
+            
+            <p id="infoResearch">Research from speech-language pathologists emphasizes:</p>
+            
+            <ul id="infoPoints">
+                <li>Providing multiple, high-quality opportunities for children to communicate</li>
+                <li>Embedding targets within engaging, naturalistic activities</li>
+                <li>Respecting each child's autonomy, sensory profile, and pacing</li>
+            </ul>
+            
+            <p id="infoResearchChinese">語言治療領域的研究指出：</p>
+            
+            <ul id="infoPointsChinese">
+                <li>提供多次、具功能性的溝通機會</li>
+                <li>將語言目標融入孩子感興趣且自然的活動中</li>
+                <li>尊重每位孩子的自主性、感官特質與互動節奏</li>
+            </ul>
+            
+            <div class="divider"></div>
+            
+            <div class="quote" id="quote1">"PMT sessions are designed to provide multiple opportunities for the child to initiate communication acts. The frequency and quality of these opportunities are critical for facilitating language development."</div>
+            <div class="attribution" id="attribution1">— Yoder & Warren (2002)</div>
+            <div class="quote" id="quote1Chinese">「PMT治療設計強調提供孩子多次主動發起溝通的機會。這些機會的頻率與品質，對於促進語言發展至關重要。」</div>
+            
+            <div class="quote" id="quote2">"EMT is a naturalistic, conversation-based strategy for teaching language and communication skills… [It] increases the child's opportunities to communicate."</div>
+            <div class="attribution" id="attribution2">— Kaiser & Roberts (2013)</div>
+            <div class="quote" id="quote2Chinese">「EMT是一種以自然對話為核心的語言教學策略……能有效提升孩子主動溝通的機會數。」</div>
+        </div>
+    </div>
+    
+    <button id="languageToggle" class="language-toggle">English / 中文</button>
+    
+    <button id="settingsButton" class="settings-button">⚙️ <span id="customizeOptions">Customize Options</span></button>
     
     <div class="form-group">
-        <label for="communicationType">Language Content/Function:</label>
+        <label for="communicationType"><span id="languageContentLabel">Language Content/Function:</span></label>
         <select id="communicationType">
-            <option value="">Select Type</option>
+            <option value="" id="selectTypeOption">Select Type</option>
         </select>
     </div>
     
     <div class="form-group">
-        <label for="supportLevel">Support Level:</label>
+        <label for="supportLevel"><span id="supportTypeLabel">Support Type:</span></label>
         <select id="supportLevel">
-            <option value="">Select Support</option>
+            <option value="" id="selectSupportOption">Select Support</option>
         </select>
     </div>
     
     <div class="form-group">
-        <label for="phrase">Phrase:</label>
+        <label for="phrase"><span id="phraseLabel">Phrase:</span></label>
         <div class="phrase-input-container">
             <input type="text" id="phrase" placeholder="Enter or dictate phrase">
             <button id="micButton" class="mic-button visible">
@@ -545,66 +737,66 @@
         </div>
     </div>
     
-    <button id="logButton">Log Entry</button>
+    <button id="logButton"><span id="logEntryText">Log Entry</span></button>
     
     <div id="entriesContainer">
         <table id="entriesTable">
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Type</th>
-                    <th>Support</th>
-                    <th>Phrase</th>
-                    <th>Actions</th>
+                    <th id="typeHeader">Type</th>
+                    <th id="supportHeader">Support</th>
+                    <th id="phraseHeader">Phrase</th>
+                    <th id="actionsHeader">Actions</th>
                 </tr>
             </thead>
             <tbody id="entriesBody">
                 <tr>
-                    <td colspan="5" class="no-entries">No entries yet</td>
+                    <td colspan="5" class="no-entries" id="noEntriesText">No entries yet</td>
                 </tr>
             </tbody>
         </table>
     </div>
     
     <div class="button-group">
-        <button id="copyButton" class="copy-btn">Copy Log to Clipboard</button>
-        <button id="clearButton" class="clear-btn">Clear All Entries</button>
+        <button id="copyButton" class="copy-btn"><span id="copyLogText">Copy Log to Clipboard</span></button>
+        <button id="clearButton" class="clear-btn"><span id="clearEntriesText">Clear All Entries</span></button>
     </div>
     
-    <div id="successMessage" class="success-message">Copied to clipboard!</div>
+    <div id="successMessage" class="success-message"><span id="copiedText">Copied to clipboard!</span></div>
     
     <!-- Settings Modal -->
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Customize Options</h2>
+                <h2 class="modal-title" id="customizeOptionsTitle">Customize Options</h2>
                 <button class="close-modal">&times;</button>
             </div>
             
             <div class="tab-buttons">
-                <button class="tab-button active" data-tab="communicationTab">Language Content/Function</button>
-                <button class="tab-button" data-tab="supportTab">Support Levels</button>
+                <button class="tab-button active" data-tab="communicationTab"><span id="languageContentTab">Language Content/Function</span></button>
+                <button class="tab-button" data-tab="supportTab"><span id="supportTypeTab">Support Type</span></button>
             </div>
             
             <div id="communicationTab" class="tab-content active">
                 <div class="option-list" id="communicationOptionsList"></div>
                 <div class="add-option-form">
                     <input type="text" class="add-option-input" id="newCommunicationType" placeholder="Add new language content/function">
-                    <button class="add-option-btn" id="addCommunicationTypeBtn">Add</button>
+                    <button class="add-option-btn" id="addCommunicationTypeBtn"><span id="addButtonText">Add</span></button>
                 </div>
             </div>
             
             <div id="supportTab" class="tab-content">
                 <div class="option-list" id="supportOptionsList"></div>
                 <div class="add-option-form">
-                    <input type="text" class="add-option-input" id="newSupportLevel" placeholder="Add new support level">
-                    <button class="add-option-btn" id="addSupportLevelBtn">Add</button>
+                    <input type="text" class="add-option-input" id="newSupportLevel" placeholder="Add new support type">
+                    <button class="add-option-btn" id="addSupportLevelBtn"><span id="addSupportButtonText">Add</span></button>
                 </div>
             </div>
             
             <div class="modal-footer">
-                <button class="reset-defaults-btn" id="resetDefaultsBtn">Reset to Defaults</button>
-                <button class="save-settings-btn" id="saveSettingsBtn">Save Changes</button>
+                <button class="reset-defaults-btn" id="resetDefaultsBtn"><span id="resetDefaultsText">Reset to Defaults</span></button>
+                <button class="save-settings-btn" id="saveSettingsBtn"><span id="saveChangesText">Save Changes</span></button>
             </div>
         </div>
     </div>
@@ -613,69 +805,238 @@
     <div id="editEntryModal" class="edit-entry-modal">
         <div class="edit-entry-content">
             <div class="edit-entry-header">
-                <h2 class="edit-entry-title">Edit Entry</h2>
+                <h2 class="edit-entry-title" id="editEntryTitle">Edit Entry</h2>
                 <button class="close-modal" id="closeEditModal">&times;</button>
             </div>
             
             <div class="form-group">
-                <label for="editCommunicationType">Language Content/Function:</label>
+                <label for="editCommunicationType"><span id="editLanguageContentLabel">Language Content/Function:</span></label>
                 <select id="editCommunicationType"></select>
             </div>
             
             <div class="form-group">
-                <label for="editSupportLevel">Support Level:</label>
+                <label for="editSupportLevel"><span id="editSupportTypeLabel">Support Type:</span></label>
                 <select id="editSupportLevel"></select>
             </div>
             
             <div class="form-group">
-                <label for="editPhrase">Phrase:</label>
+                <label for="editPhrase"><span id="editPhraseLabel">Phrase:</span></label>
                 <input type="text" id="editPhrase">
             </div>
             
             <div class="edit-entry-footer">
-                <button id="cancelEditBtn" class="cancel-edit-btn">Cancel</button>
-                <button id="saveEditBtn" class="save-edit-btn">Save Changes</button>
+                <button id="cancelEditBtn" class="cancel-edit-btn"><span id="cancelText">Cancel</span></button>
+                <button id="saveEditBtn" class="save-edit-btn"><span id="saveChangesEditText">Save Changes</span></button>
             </div>
         </div>
     </div>
     
+    <!-- Footer -->
+    <div class="footer">
+        <p class="disclaimer" id="disclaimerText">為確保資訊的準確性，我們強烈建議您先行檢查內容的正確性再使用於臨床紀錄中。</p>
+        <p class="credit">Designed by Sheila Lin, MSc., reg. CASLPO, S-LP(C)</p>
+    </div>
+    
     <script>
-        // Default options
-        const defaultCommunicationTypes = [
-            "Direct Actions",
-            "Protest/Rejecting",
-            "Comment Attributes",
-            "Comment Locative",
-            "Responding, Joining",
-            "Obtaining Attention/Info",
-            "Greeting",
-            "Expressing feelings",
-            "Self-advocating",
-            "Regulating",
-            "Other"
-        ];
+        // Translations
+        const translations = {
+            en: {
+                appTitle: "SLP Language & Functional Communication Data Logger",
+                customizeOptions: "Customize Options",
+                languageContent: "Language Content/Function:",
+                supportType: "Support Type:",
+                phrase: "Phrase:",
+                selectType: "Select Type",
+                selectSupport: "Select Support",
+                enterPhrase: "Enter or dictate phrase",
+                listening: "Listening...",
+                logEntry: "Log Entry",
+                typeHeader: "Type",
+                supportHeader: "Support",
+                phraseHeader: "Phrase",
+                actionsHeader: "Actions",
+                noEntries: "No entries yet",
+                copyLog: "Copy Log to Clipboard",
+                clearEntries: "Clear All Entries",
+                copied: "Copied to clipboard!",
+                customizeOptionsTitle: "Customize Options",
+                languageContentTab: "Language Content/Function",
+                supportTypeTab: "Support Type",
+                addNewLanguageContent: "Add new language content/function",
+                addNewSupportType: "Add new support type",
+                add: "Add",
+                resetDefaults: "Reset to Defaults",
+                saveChanges: "Save Changes",
+                editEntry: "Edit Entry",
+                cancel: "Cancel",
+                fillAllFields: "Please fill in all fields",
+                confirmDelete: "Are you sure you want to delete this entry?",
+                noEntriesToClear: "No entries to clear",
+                confirmClear: "Are you sure you want to clear all entries? This cannot be undone.",
+                noEntriesToCopy: "No entries to copy",
+                failedToCopy: "Failed to copy to clipboard",
+                confirmReset: "Are you sure you want to reset all options to defaults?",
+                optionEmpty: "Option cannot be empty",
+                typeExists: "This language content/function type already exists",
+                supportExists: "This support type already exists",
+                atLeastOneType: "You must have at least one language content/function type",
+                atLeastOneSupport: "You must have at least one support type",
+                edit: "Edit",
+                delete: "Delete",
+                disclaimer: "To ensure accuracy, we strongly recommend verifying the content before using it in clinical records."
+            },
+            zh: {
+                appTitle: "SLP 語言與功能性溝通數據記錄器",
+                customizeOptions: "自訂輸入",
+                languageContent: "語言內容/功能：",
+                supportType: "提示方式：",
+                phrase: "語句：",
+                selectType: "選擇類型",
+                selectSupport: "選擇支持",
+                enterPhrase: "輸入或口述語句",
+                listening: "正在聆聽...",
+                logEntry: "記錄條目",
+                typeHeader: "類型",
+                supportHeader: "支持",
+                phraseHeader: "語句",
+                actionsHeader: "操作",
+                noEntries: "尚無條目",
+                copyLog: "複製記錄到剪貼板",
+                clearEntries: "清除所有條目",
+                copied: "已複製到剪貼板！",
+                customizeOptionsTitle: "自訂輸入",
+                languageContentTab: "語言內容/功能",
+                supportTypeTab: "提示方式",
+                addNewLanguageContent: "添加新的語言內容/功能",
+                addNewSupportType: "添加新的提示方式",
+                add: "添加",
+                resetDefaults: "重置為默認值",
+                saveChanges: "保存更改",
+                editEntry: "編輯條目",
+                cancel: "取消",
+                fillAllFields: "請填寫所有欄位",
+                confirmDelete: "您確定要刪除此條目嗎？",
+                noEntriesToClear: "沒有條目可清除",
+                confirmClear: "您確定要清除所有條目嗎？此操作無法撤銷。",
+                noEntriesToCopy: "沒有條目可複製",
+                failedToCopy: "複製到剪貼板失敗",
+                confirmReset: "您確定要將所有選項重置為默認值嗎？",
+                optionEmpty: "選項不能為空",
+                typeExists: "此語言內容/功能類型已存在",
+                supportExists: "此提示方式已存在",
+                atLeastOneType: "您必須至少有一種語言內容/功能類型",
+                atLeastOneSupport: "您必須至少有一種提示方式",
+                edit: "編輯",
+                delete: "刪除",
+                disclaimer: "為確保資訊的準確性，我們強烈建議您先行檢查內容的正確性再使用於臨床紀錄中。"
+            }
+        };
         
-        const defaultSupportLevels = [
-            "1a. Independent as motivated",
-            "1b. Independent on external demand",
-            "1c. Achieved with consistent, appropriate accommodation",
-            "2. Inviting or distracted pausing",
-            "3. Indirect visual cues",
-            "4. Direct visual cues with option prompts as needed",
-            "5. Indirect verbal cues/Invitation to discuss",
-            "6. Direct verbal cues (options or first words/sounds)",
-            "7. Specific non-directive models",
-            "8. Re-exposure to target and increase motivation"
-        ];
+        // Default options
+        const defaultCommunicationTypes = {
+            en: [
+                "Direct Actions",
+                "Protest/Rejecting",
+                "Comment Attributes",
+                "Comment Locative",
+                "Responding, Joining",
+                "Obtaining Attention/Information",
+                "Greeting",
+                "Expressing Feelings",
+                "Self-advocacy",
+                "Regulating",
+                "Other"
+            ],
+            zh: [
+                "指示動作（Direct Actions）",
+                "拒絕／抗議（Protest/Rejecting）",
+                "描述物件特徵（Comment Attributes）",
+                "描述位置（Comment Locative）",
+                "回應／參與互動（Responding, Joining）",
+                "尋求注意／詢求資訊（Obtaining Attention/Information）",
+                "打招呼（Greeting）",
+                "表達情緒（Expressing Feelings）",
+                "自我倡議（Self-advocacy）",
+                "自我調節（Regulating）",
+                "其他（Other）"
+            ]
+        };
+        
+        const defaultSupportLevels = {
+            en: [
+                "1a. Independent as motivated",
+                "1b. Independent on external demand",
+                "1c. Achieved with consistent, appropriate accommodation",
+                "2. Inviting or distracted pausing",
+                "3. Indirect visual cues",
+                "4. Direct visual cues with option prompts as needed",
+                "5. Indirect verbal cues/Invitation to discuss",
+                "6. Direct verbal cues (options or first words/sounds)",
+                "7. Specific non-directive models",
+                "8. Re-exposure to target and increase motivation"
+            ],
+            zh: [
+                "1a. 在有內在動機時可自主完成",
+                "1b. 在外在要求下可自主完成",
+                "1c. 在持續且合適的調整支持下可完成",
+                "2. 透過等待或轉移注意的方式提供邀請性機會",
+                "3. 間接的視覺提示",
+                "4. 直接視覺提示（必要時提供選項提示）",
+                "5. 間接語言提示／邀請討論",
+                "6. 直接語言提示（給予選項或提供開頭詞／聲音）",
+                "7. 特定但非指令式的示範",
+                "8. 再次接觸目標並提升動機"
+            ]
+        };
+        
+        // Current language
+        let currentLanguage = 'en';
         
         // Current options (will be loaded from localStorage if available)
-        let communicationTypes = [...defaultCommunicationTypes];
-        let supportLevels = [...defaultSupportLevels];
+        let communicationTypes = [...defaultCommunicationTypes.en];
+        let supportLevels = [...defaultSupportLevels.en];
         
         // Initialize entries array
         let entries = [];
         
         // DOM elements
+        const languageToggle = document.getElementById('languageToggle');
+        const appTitle = document.getElementById('appTitle');
+        const customizeOptions = document.getElementById('customizeOptions');
+        const languageContentLabel = document.getElementById('languageContentLabel');
+        const supportTypeLabel = document.getElementById('supportTypeLabel');
+        const phraseLabel = document.getElementById('phraseLabel');
+        const selectTypeOption = document.getElementById('selectTypeOption');
+        const selectSupportOption = document.getElementById('selectSupportOption');
+        const logEntryText = document.getElementById('logEntryText');
+        const typeHeader = document.getElementById('typeHeader');
+        const supportHeader = document.getElementById('supportHeader');
+        const phraseHeader = document.getElementById('phraseHeader');
+        const actionsHeader = document.getElementById('actionsHeader');
+        const noEntriesText = document.getElementById('noEntriesText');
+        const copyLogText = document.getElementById('copyLogText');
+        const clearEntriesText = document.getElementById('clearEntriesText');
+        const copiedText = document.getElementById('copiedText');
+        const customizeOptionsTitle = document.getElementById('customizeOptionsTitle');
+        const languageContentTab = document.getElementById('languageContentTab');
+        const supportTypeTab = document.getElementById('supportTypeTab');
+        const addButtonText = document.getElementById('addButtonText');
+        const addSupportButtonText = document.getElementById('addSupportButtonText');
+        const resetDefaultsText = document.getElementById('resetDefaultsText');
+        const saveChangesText = document.getElementById('saveChangesText');
+        const editEntryTitle = document.getElementById('editEntryTitle');
+        const editLanguageContentLabel = document.getElementById('editLanguageContentLabel');
+        const editSupportTypeLabel = document.getElementById('editSupportTypeLabel');
+        const editPhraseLabel = document.getElementById('editPhraseLabel');
+        const cancelText = document.getElementById('cancelText');
+        const saveChangesEditText = document.getElementById('saveChangesEditText');
+        const disclaimerText = document.getElementById('disclaimerText');
+        
+        // Info panel elements
+        const infoButton = document.getElementById('infoButton');
+        const infoPanel = document.getElementById('infoPanel');
+        const closeInfo = document.getElementById('closeInfo');
+        
         const communicationTypeSelect = document.getElementById('communicationType');
         const supportLevelSelect = document.getElementById('supportLevel');
         const phraseInput = document.getElementById('phrase');
@@ -715,24 +1076,118 @@
         let recognition = null;
         let isRecording = false;
         
+        // Function to update UI language
+        function updateLanguage() {
+            const t = translations[currentLanguage];
+            
+            // Update all text elements
+            appTitle.textContent = t.appTitle;
+            customizeOptions.textContent = t.customizeOptions;
+            languageContentLabel.textContent = t.languageContent;
+            supportTypeLabel.textContent = t.supportType;
+            phraseLabel.textContent = t.phrase;
+            selectTypeOption.textContent = t.selectType;
+            selectSupportOption.textContent = t.selectSupport;
+            phraseInput.placeholder = t.enterPhrase;
+            logEntryText.textContent = t.logEntry;
+            typeHeader.textContent = t.typeHeader;
+            supportHeader.textContent = t.supportHeader;
+            phraseHeader.textContent = t.phraseHeader;
+            actionsHeader.textContent = t.actionsHeader;
+            noEntriesText.textContent = t.noEntries;
+            copyLogText.textContent = t.copyLog;
+            clearEntriesText.textContent = t.clearEntries;
+            copiedText.textContent = t.copied;
+            customizeOptionsTitle.textContent = t.customizeOptionsTitle;
+            languageContentTab.textContent = t.languageContentTab;
+            supportTypeTab.textContent = t.supportTypeTab;
+            newCommunicationTypeInput.placeholder = t.addNewLanguageContent;
+            newSupportLevelInput.placeholder = t.addNewSupportType;
+            addButtonText.textContent = t.add;
+            addSupportButtonText.textContent = t.add;
+            resetDefaultsText.textContent = t.resetDefaults;
+            saveChangesText.textContent = t.saveChanges;
+            editEntryTitle.textContent = t.editEntry;
+            editLanguageContentLabel.textContent = t.languageContent;
+            editSupportTypeLabel.textContent = t.supportType;
+            editPhraseLabel.textContent = t.phrase;
+            cancelText.textContent = t.cancel;
+            saveChangesEditText.textContent = t.saveChanges;
+            disclaimerText.textContent = t.disclaimer;
+            
+            // Update document title
+            document.title = t.appTitle;
+            
+            // Update language toggle button
+            languageToggle.textContent = currentLanguage === 'en' ? 'English / 中文' : '中文 / English';
+        }
+        
+        // Toggle language
+        languageToggle.addEventListener('click', () => {
+            currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
+            
+            // Save current language preference
+            localStorage.setItem('language', currentLanguage);
+            
+            // Update communication types and support levels based on language
+            communicationTypes = JSON.parse(localStorage.getItem('communicationTypes_' + currentLanguage)) || 
+                [...defaultCommunicationTypes[currentLanguage]];
+            supportLevels = JSON.parse(localStorage.getItem('supportLevels_' + currentLanguage)) || 
+                [...defaultSupportLevels[currentLanguage]];
+            
+            // Update UI language
+            updateLanguage();
+            
+            // Update dropdowns
+            populateDropdowns();
+            
+            // Update table
+            updateTable();
+        });
+        
+        // Info button toggle
+        infoButton.addEventListener('click', () => {
+            infoPanel.classList.toggle('active');
+        });
+        
+        // Close info panel
+        closeInfo.addEventListener('click', () => {
+            infoPanel.classList.remove('active');
+        });
+        
         // Load options from localStorage if available
         function loadOptions() {
-            const savedCommunicationTypes = localStorage.getItem('communicationTypes');
-            const savedSupportLevels = localStorage.getItem('supportLevels');
+            // Load language preference
+            const savedLanguage = localStorage.getItem('language');
+            if (savedLanguage) {
+                currentLanguage = savedLanguage;
+            }
+            
+            // Load communication types and support levels for current language
+            const savedCommunicationTypes = localStorage.getItem('communicationTypes_' + currentLanguage);
+            const savedSupportLevels = localStorage.getItem('supportLevels_' + currentLanguage);
             const savedEntries = localStorage.getItem('entries');
             
             if (savedCommunicationTypes) {
                 communicationTypes = JSON.parse(savedCommunicationTypes);
+            } else {
+                communicationTypes = [...defaultCommunicationTypes[currentLanguage]];
             }
             
             if (savedSupportLevels) {
                 supportLevels = JSON.parse(savedSupportLevels);
+            } else {
+                supportLevels = [...defaultSupportLevels[currentLanguage]];
             }
             
             if (savedEntries) {
                 entries = JSON.parse(savedEntries);
             }
             
+            // Update UI language
+            updateLanguage();
+            
+            // Populate dropdowns
             populateDropdowns();
         }
         
@@ -798,6 +1253,8 @@
             communicationOptionsList.innerHTML = '';
             supportOptionsList.innerHTML = '';
             
+            const t = translations[currentLanguage];
+            
             // Populate communication types
             communicationTypes.forEach((type, index) => {
                 const optionItem = document.createElement('div');
@@ -813,12 +1270,12 @@
                 
                 const editBtn = document.createElement('button');
                 editBtn.className = 'edit-btn';
-                editBtn.textContent = 'Edit';
+                editBtn.textContent = t.edit;
                 editBtn.onclick = () => startEditing(optionItem, type, 'communication');
                 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'delete-btn';
-                deleteBtn.textContent = 'Delete';
+                deleteBtn.textContent = t.delete;
                 deleteBtn.onclick = () => deleteOption(index, 'communication');
                 
                 optionActions.appendChild(editBtn);
@@ -845,12 +1302,12 @@
                 
                 const editBtn = document.createElement('button');
                 editBtn.className = 'edit-btn';
-                editBtn.textContent = 'Edit';
+                editBtn.textContent = t.edit;
                 editBtn.onclick = () => startEditing(optionItem, level, 'support');
                 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'delete-btn';
-                deleteBtn.textContent = 'Delete';
+                deleteBtn.textContent = t.delete;
                 deleteBtn.onclick = () => deleteOption(index, 'support');
                 
                 optionActions.appendChild(editBtn);
@@ -882,14 +1339,16 @@
             editInput.className = 'edit-input';
             editInput.value = currentValue;
             
+            const t = translations[currentLanguage];
+            
             const saveBtn = document.createElement('button');
             saveBtn.className = 'save-edit-btn';
-            saveBtn.textContent = 'Save';
+            saveBtn.textContent = t.saveChanges;
             saveBtn.onclick = () => saveEdit(index, editInput.value, type, optionItem);
             
             const cancelBtn = document.createElement('button');
             cancelBtn.className = 'cancel-edit-btn';
-            cancelBtn.textContent = 'Cancel';
+            cancelBtn.textContent = t.cancel;
             cancelBtn.onclick = () => cancelEdit(optionItem);
             
             editForm.appendChild(editInput);
@@ -901,8 +1360,10 @@
         
         // Save edited option
         function saveEdit(index, newValue, type, optionItem) {
+            const t = translations[currentLanguage];
+            
             if (newValue.trim() === '') {
-                alert('Option cannot be empty');
+                alert(t.optionEmpty);
                 return;
             }
             
@@ -932,15 +1393,17 @@
         
         // Delete an option
         function deleteOption(index, type) {
+            const t = translations[currentLanguage];
+            
             if (type === 'communication') {
                 if (communicationTypes.length <= 1) {
-                    alert('You must have at least one language content/function type');
+                    alert(t.atLeastOneType);
                     return;
                 }
                 communicationTypes.splice(index, 1);
             } else {
                 if (supportLevels.length <= 1) {
-                    alert('You must have at least one support level');
+                    alert(t.atLeastOneSupport);
                     return;
                 }
                 supportLevels.splice(index, 1);
@@ -952,23 +1415,24 @@
         
         // Add a new option
         function addOption(type) {
+            const t = translations[currentLanguage];
             const input = type === 'communication' ? newCommunicationTypeInput : newSupportLevelInput;
             const value = input.value.trim();
             
             if (value === '') {
-                alert('Option cannot be empty');
+                alert(t.optionEmpty);
                 return;
             }
             
             if (type === 'communication') {
                 if (communicationTypes.includes(value)) {
-                    alert('This language content/function type already exists');
+                    alert(t.typeExists);
                     return;
                 }
                 communicationTypes.push(value);
             } else {
                 if (supportLevels.includes(value)) {
-                    alert('This support level already exists');
+                    alert(t.supportExists);
                     return;
                 }
                 supportLevels.push(value);
@@ -983,8 +1447,8 @@
         
         // Save options to localStorage
         function saveOptions() {
-            localStorage.setItem('communicationTypes', JSON.stringify(communicationTypes));
-            localStorage.setItem('supportLevels', JSON.stringify(supportLevels));
+            localStorage.setItem('communicationTypes_' + currentLanguage, JSON.stringify(communicationTypes));
+            localStorage.setItem('supportLevels_' + currentLanguage, JSON.stringify(supportLevels));
             
             // Update dropdowns
             populateDropdowns();
@@ -995,9 +1459,11 @@
         
         // Reset options to defaults
         function resetOptions() {
-            if (confirm('Are you sure you want to reset all options to defaults?')) {
-                communicationTypes = [...defaultCommunicationTypes];
-                supportLevels = [...defaultSupportLevels];
+            const t = translations[currentLanguage];
+            
+            if (confirm(t.confirmReset)) {
+                communicationTypes = [...defaultCommunicationTypes[currentLanguage]];
+                supportLevels = [...defaultSupportLevels[currentLanguage]];
                 
                 // Refresh the option lists
                 populateOptionLists();
@@ -1012,6 +1478,9 @@
                 recognition.continuous = false;
                 recognition.interimResults = false;
                 
+                // Set language based on current UI language
+                recognition.lang = currentLanguage === 'en' ? 'en-CA' : 'zh-TW';
+                
                 // Make mic button visible
                 micButton.classList.add('visible');
                 
@@ -1019,7 +1488,8 @@
                 recognition.onstart = () => {
                     isRecording = true;
                     micButton.classList.add('active');
-                    phraseInput.placeholder = "Listening...";
+                    const t = translations[currentLanguage];
+                    phraseInput.placeholder = t.listening;
                 };
                 
                 recognition.onresult = (event) => {
@@ -1030,14 +1500,16 @@
                 recognition.onend = () => {
                     isRecording = false;
                     micButton.classList.remove('active');
-                    phraseInput.placeholder = "Enter or dictate phrase";
+                    const t = translations[currentLanguage];
+                    phraseInput.placeholder = t.enterPhrase;
                 };
                 
                 recognition.onerror = (event) => {
                     console.error('Speech recognition error', event.error);
                     isRecording = false;
                     micButton.classList.remove('active');
-                    phraseInput.placeholder = "Enter or dictate phrase";
+                    const t = translations[currentLanguage];
+                    phraseInput.placeholder = t.enterPhrase;
                 };
                 
                 // Set up click handlers for speech input
@@ -1060,6 +1532,8 @@
         // Start recording
         function startRecording() {
             if (recognition) {
+                // Update recognition language based on current UI language
+                recognition.lang = currentLanguage === 'en' ? 'en-CA' : 'zh-TW';
                 recognition.start();
             }
         }
@@ -1077,9 +1551,11 @@
             const supportLevel = supportLevelSelect.value;
             const phrase = phraseInput.value.trim();
             
+            const t = translations[currentLanguage];
+            
             // Validate inputs
             if (!communicationType || !supportLevel || !phrase) {
-                alert('Please fill in all fields');
+                alert(t.fillAllFields);
                 return;
             }
             
@@ -1107,8 +1583,10 @@
         
         // Update table function
         function updateTable() {
+            const t = translations[currentLanguage];
+            
             if (entries.length === 0) {
-                entriesBody.innerHTML = '<tr><td colspan="5" class="no-entries">No entries yet</td></tr>';
+                entriesBody.innerHTML = `<tr><td colspan="5" class="no-entries">${t.noEntries}</td></tr>`;
                 return;
             }
             
@@ -1136,13 +1614,13 @@
                 const editBtn = document.createElement('button');
                 editBtn.className = 'action-btn edit-entry-btn';
                 editBtn.textContent = '✏️';
-                editBtn.title = 'Edit entry';
+                editBtn.title = t.edit;
                 editBtn.onclick = () => openEditModal(index);
                 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'action-btn delete-entry-btn';
                 deleteBtn.textContent = '🗑️';
-                deleteBtn.title = 'Delete entry';
+                deleteBtn.title = t.delete;
                 deleteBtn.onclick = () => deleteEntry(index);
                 
                 actionsCell.appendChild(editBtn);
@@ -1183,9 +1661,11 @@
             const supportLevel = editSupportLevelSelect.value;
             const phrase = editPhraseInput.value.trim();
             
+            const t = translations[currentLanguage];
+            
             // Validate inputs
             if (!communicationType || !supportLevel || !phrase) {
-                alert('Please fill in all fields');
+                alert(t.fillAllFields);
                 return;
             }
             
@@ -1207,7 +1687,9 @@
         
         // Delete entry
         function deleteEntry(index) {
-            if (confirm('Are you sure you want to delete this entry?')) {
+            const t = translations[currentLanguage];
+            
+            if (confirm(t.confirmDelete)) {
                 // Remove entry
                 entries.splice(index, 1);
                 
@@ -1226,12 +1708,14 @@
         
         // Clear all entries
         function clearAllEntries() {
+            const t = translations[currentLanguage];
+            
             if (entries.length === 0) {
-                alert('No entries to clear');
+                alert(t.noEntriesToClear);
                 return;
             }
             
-            if (confirm('Are you sure you want to clear all entries? This cannot be undone.')) {
+            if (confirm(t.confirmClear)) {
                 entries = [];
                 saveEntries();
                 updateTable();
@@ -1240,8 +1724,10 @@
         
         // Copy to clipboard function
         copyButton.addEventListener('click', () => {
+            const t = translations[currentLanguage];
+            
             if (entries.length === 0) {
-                alert('No entries to copy');
+                alert(t.noEntriesToCopy);
                 return;
             }
             
@@ -1262,7 +1748,7 @@
                 })
                 .catch(err => {
                     console.error('Failed to copy: ', err);
-                    alert('Failed to copy to clipboard');
+                    alert(t.failedToCopy);
                 });
         });
         
